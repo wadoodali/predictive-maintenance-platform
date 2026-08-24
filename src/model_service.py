@@ -6,7 +6,18 @@ import pandas as pd
 
 class ModelService:
 
-    FEATURES = [
+    SCALER_FEATURES = [
+        "Air temperature [K]",
+        "Process temperature [K]",
+        "Rotational speed [rpm]",
+        "Torque [Nm]",
+        "Tool wear [min]",
+        "Type_H",
+        "Type_L",
+        "Type_M",
+    ]
+
+    MODEL_FEATURES = [
         "Type_H",
         "Type_L",
         "Type_M",
@@ -39,16 +50,19 @@ class ModelService:
         tool_wear: float,
     ) -> pd.DataFrame:
 
-        return pd.DataFrame([{
-            "Type_H": int(machine_type == "H"),
-            "Type_L": int(machine_type == "L"),
-            "Type_M": int(machine_type == "M"),
-            "Air temperature [K]": air_temperature,
-            "Process temperature [K]": process_temperature,
-            "Rotational speed [rpm]": rotational_speed,
-            "Torque [Nm]": torque,
-            "Tool wear [min]": tool_wear,
-        }], columns=self.FEATURES)
+        return pd.DataFrame(
+            [{
+                "Air temperature [K]": air_temperature,
+                "Process temperature [K]": process_temperature,
+                "Rotational speed [rpm]": rotational_speed,
+                "Torque [Nm]": torque,
+                "Tool wear [min]": tool_wear,
+                "Type_H": int(machine_type == "H"),
+                "Type_L": int(machine_type == "L"),
+                "Type_M": int(machine_type == "M"),
+            }],
+            columns=self.SCALER_FEATURES,
+        )
 
     def predict(
         self,
@@ -69,15 +83,24 @@ class ModelService:
             tool_wear,
         )
 
-        scaled_features = self.scaler.transform(features.to_numpy())
+        # Scale using the feature order expected by the scaler
+        scaled_features = self.scaler.transform(features)
 
+        # Convert back to a DataFrame so feature names are preserved
         scaled_features = pd.DataFrame(
             scaled_features,
-            columns=self.FEATURES,
-)
+            columns=self.SCALER_FEATURES,
+        )
 
-        prediction = int(self.model.predict(scaled_features)[0])
+        # Reorder features to match the order expected by the model
+        scaled_features = scaled_features[self.MODEL_FEATURES]
+
+        prediction = int(
+            self.model.predict(scaled_features)[0]
+        )
+
         probability = float(
             self.model.predict_proba(scaled_features)[0, 1]
-)
+        )
+
         return prediction, round(probability, 4)
