@@ -103,4 +103,46 @@ class ModelService:
             self.model.predict_proba(scaled_features)[0, 1]
         )
 
+
         return prediction, round(probability, 4)
+    def get_feature_importance(self) -> dict[str, float]:
+        importances = self.model.feature_importances_
+
+        return {
+            "Machine Type": float(
+                importances[
+                    self.MODEL_FEATURES.index("Type_H")
+                ]
+                + importances[
+                    self.MODEL_FEATURES.index("Type_L")
+                ]
+                + importances[
+                    self.MODEL_FEATURES.index("Type_M")
+                ]
+            ),
+            "Air Temperature": float(
+                importances[
+                    self.MODEL_FEATURES.index("Air temperature [K]")
+                ]
+            ),
+            "Process Temperature": float(
+                importances[
+                    self.MODEL_FEATURES.index("Process temperature [K]")
+                ]
+            ),
+            "Rotational Speed": float(
+                importances[
+                    self.MODEL_FEATURES.index("Rotational speed [rpm]")
+                ]
+            ),
+            "Torque": float(
+                importances[
+                    self.MODEL_FEATURES.index("Torque [Nm]")
+                ]
+            ),
+            "Tool Wear": float(
+                importances[
+                    self.MODEL_FEATURES.index("Tool wear [min]")
+                ]
+            ),
+        }
