@@ -1,10 +1,7 @@
 from fastapi.testclient import TestClient
-
 from src.api import app
 
-
 client = TestClient(app)
-
 
 def test_home():
     response = client.get("/")
