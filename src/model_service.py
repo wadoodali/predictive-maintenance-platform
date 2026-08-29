@@ -6,17 +6,6 @@ import pandas as pd
 
 class ModelService:
 
-    SCALER_FEATURES = [
-        "Air temperature [K]",
-        "Process temperature [K]",
-        "Rotational speed [rpm]",
-        "Torque [Nm]",
-        "Tool wear [min]",
-        "Type_H",
-        "Type_L",
-        "Type_M",
-    ]
-
     MODEL_FEATURES = [
         "Type_H",
         "Type_L",
@@ -28,16 +17,14 @@ class ModelService:
         "Tool wear [min]",
     ]
 
+    THRESHOLD = 0.35
+
     def __init__(self):
         base_dir = Path(__file__).resolve().parent.parent
         model_dir = base_dir / "models"
 
         self.model = joblib.load(
             model_dir / "gradient_boosting_model.pkl"
-        )
-
-        self.scaler = joblib.load(
-            model_dir / "scaler.pkl"
         )
 
     def prepare_input(
@@ -52,16 +39,16 @@ class ModelService:
 
         return pd.DataFrame(
             [{
+                "Type_H": int(machine_type == "H"),
+                "Type_L": int(machine_type == "L"),
+                "Type_M": int(machine_type == "M"),
                 "Air temperature [K]": air_temperature,
                 "Process temperature [K]": process_temperature,
                 "Rotational speed [rpm]": rotational_speed,
                 "Torque [Nm]": torque,
                 "Tool wear [min]": tool_wear,
-                "Type_H": int(machine_type == "H"),
-                "Type_L": int(machine_type == "L"),
-                "Type_M": int(machine_type == "M"),
             }],
-            columns=self.SCALER_FEATURES,
+            columns=self.MODEL_FEATURES,
         )
 
     def predict(
@@ -83,66 +70,29 @@ class ModelService:
             tool_wear,
         )
 
-        # Scale using the feature order expected by the scaler
-        scaled_features = self.scaler.transform(features)
-
-        # Convert back to a DataFrame so feature names are preserved
-        scaled_features = pd.DataFrame(
-            scaled_features,
-            columns=self.SCALER_FEATURES,
+        probability = float(
+            self.model.predict_proba(features)[0, 1]
         )
-
-        # Reorder features to match the order expected by the model
-        scaled_features = scaled_features[self.MODEL_FEATURES]
 
         prediction = int(
-            self.model.predict(scaled_features)[0]
+            probability >= self.THRESHOLD
         )
-
-        probability = float(
-            self.model.predict_proba(scaled_features)[0, 1]
-        )
-
 
         return prediction, round(probability, 4)
+
     def get_feature_importance(self) -> dict[str, float]:
+
         importances = self.model.feature_importances_
 
         return {
             "Machine Type": float(
-                importances[
-                    self.MODEL_FEATURES.index("Type_H")
-                ]
-                + importances[
-                    self.MODEL_FEATURES.index("Type_L")
-                ]
-                + importances[
-                    self.MODEL_FEATURES.index("Type_M")
-                ]
+                importances[0]
+                + importances[1]
+                + importances[2]
             ),
-            "Air Temperature": float(
-                importances[
-                    self.MODEL_FEATURES.index("Air temperature [K]")
-                ]
-            ),
-            "Process Temperature": float(
-                importances[
-                    self.MODEL_FEATURES.index("Process temperature [K]")
-                ]
-            ),
-            "Rotational Speed": float(
-                importances[
-                    self.MODEL_FEATURES.index("Rotational speed [rpm]")
-                ]
-            ),
-            "Torque": float(
-                importances[
-                    self.MODEL_FEATURES.index("Torque [Nm]")
-                ]
-            ),
-            "Tool Wear": float(
-                importances[
-                    self.MODEL_FEATURES.index("Tool wear [min]")
-                ]
-            ),
+            "Air Temperature": float(importances[3]),
+            "Process Temperature": float(importances[4]),
+            "Rotational Speed": float(importances[5]),
+            "Torque": float(importances[6]),
+            "Tool Wear": float(importances[7]),
         }
