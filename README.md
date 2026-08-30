@@ -27,9 +27,12 @@ The dataset also contains machine failure labels and failure-mode indicators.
 
 The dataset is synthetic but was designed to reflect predictive maintenance data encountered in industrial environments.
 
-**Source:** UCI Machine Learning Repository  
-**Dataset:** AI4I 2020 Predictive Maintenance Dataset  
-**DOI:** 10.24432/C5HS5C  
+**Source:** UCI Machine Learning Repository
+
+**Dataset:** AI4I 2020 Predictive Maintenance Dataset
+
+**DOI:** 10.24432/C5HS5C
+
 **License:** CC BY 4.0
 
 ## Machine Learning Model
@@ -71,12 +74,11 @@ The API validates incoming inputs using Pydantic and provides an interactive Swa
 
 ### API Endpoint
 
-```text
-POST /predict
+`POST /predict`
 
-**### Example Request**
+#### Example Request
 
-\`\`\`json
+```json
 {
   "machine_type": "L",
   "air_temperature": 298.1,
@@ -85,14 +87,14 @@ POST /predict
   "torque": 42.8,
   "tool_wear": 0
 }
-\`\`\`
+```
 
-**### Example Response**
+#### Example Response
 
-\`\`\`json
+```json
 {
   "prediction": 0,
-  "failure_probability": 0.0072,
+  "failure_probability": 0.0022,
   "message": "No machine failure predicted",
   "feature_importance": {
     "Machine Type": 0.4017302435729959,
@@ -103,167 +105,151 @@ POST /predict
     "Tool Wear": 0.0030598347203531135
   }
 }
-\`\`\`
+```
 
 The prediction threshold is set to **0.35**. A failure probability greater than or equal to this threshold is classified as a predicted machine failure.
 
 The API functionality is covered by automated tests using `pytest`.
 
-**## Interactive Dashboard**
+## Interactive Dashboard
 
 The project includes an interactive **Streamlit dashboard** that allows users to enter current machine operating conditions and receive a failure-risk assessment.
 
 Users can provide:
 
-\- Machine type
-
-\- Air temperature
-
-\- Process temperature
-
-\- Rotational speed
-
-\- Torque
-
-\- Tool wear
+- Machine type
+- Air temperature
+- Process temperature
+- Rotational speed
+- Torque
+- Tool wear
 
 The dashboard displays:
 
-\- Estimated machine health
-
-\- Failure probability
-
-\- Predicted failure status
-
-\- Risk level
-
-\- Recommended maintenance action
-
-\- Key model drivers
-
-\- Current operating conditions
+- Estimated machine health
+- Failure probability
+- Predicted failure status
+- Risk level
+- Recommended maintenance action
+- Key model drivers
+- Current operating conditions
 
 The dashboard communicates with the FastAPI backend for predictions, ensuring that the same deployed model is used for dashboard predictions and API requests.
 
-**## Docker**
+## Docker
 
 The application is containerized using **Docker** and **Docker Compose**.
 
 The Docker setup consists of two services:
 
-\- **API:** FastAPI prediction service
-
-\- **Dashboard:** Streamlit interactive dashboard
+- API: FastAPI prediction service
+- Dashboard: Streamlit interactive dashboard
 
 Both services are built from the project's Dockerfile.
 
-**### Start the Application**
+### Start the Application
 
 Make sure Docker Desktop is running, then execute:
 
-\`\`\`bash
+```bash
 docker compose up -d --build
-\`\`\`
+```
 
 Check the running containers:
 
-\`\`\`bash
+```bash
 docker compose ps
-\`\`\`
+```
 
-**### Access the Application**
+### Access the Application
 
 FastAPI:
 
-\`\`\`text
-http://localhost:8000
-\`\`\`
+[http://localhost:8000](http://localhost:8000)
 
 FastAPI Swagger documentation:
 
-\`\`\`text
-http://localhost:8000/docs
-\`\`\`
+[http://localhost:8000/docs](http://localhost:8000/docs)
 
 Streamlit dashboard:
 
-\`\`\`text
-http://localhost:8501
-\`\`\`
+[http://localhost:8501](http://localhost:8501)
 
-**### Stop the Application**
+### Stop the Application
 
-\`\`\`bash
+```bash
 docker compose down
-\`\`\`
+```
 
-**## How to Run Locally**
+## How to Run Locally
 
-**### 1. Clone the Repository**
+### 1. Clone the Repository
 
-\`\`\`bash
+```bash
 git clone https://github.com/wadoodali/predictive-maintenance-platform.git
+
 cd predictive-maintenance-platform
-\`\`\`
+```
 
-**### 2. Create a Virtual Environment**
+### 2. Create a Virtual Environment
 
-\`\`\`bash
+```bash
 python -m venv .venv
-\`\`\`
+```
 
 Activate it on Windows:
 
-\`\`\`bash
+```bash
 .venv\Scripts\activate
-\`\`\`
+```
 
-**### 3. Install Dependencies**
+### 3. Install Dependencies
 
-\`\`\`bash
+```bash
 pip install -r requirements.txt
-\`\`\`
+```
 
-**### 4. Start the FastAPI Server**
+### 4. Start the FastAPI Server
 
-\`\`\`bash
+```bash
 uvicorn src.api:app --reload --port 8000
-\`\`\`
+```
 
 Keep this terminal running.
 
-**### 5. Start the Streamlit Dashboard**
+### 5. Start the Streamlit Dashboard
 
 Open a second terminal in the project folder.
 
 Activate the virtual environment:
 
-\`\`\`bash
+```bash
 .venv\Scripts\activate
-\`\`\`
+```
 
 Then run:
 
-\`\`\`bash
+```bash
 streamlit run app.py
-\`\`\`
+```
 
 The Streamlit dashboard will open in your browser.
 
-**### 6. Run the Tests**
+### 6. Run the Tests
 
 To run the automated API tests:
 
-\`\`\`bash
+```bash
 python -m pytest
-\`\`\`
+```
 
 The test suite should complete successfully.
 
-**## Project Structure**
+## Project Structure
 
-\`\`\`text
+```text
 predictive-maintenance-platform/
+
 │
 ├── data/
 │   ├── raw/
@@ -295,58 +281,35 @@ predictive-maintenance-platform/
 ├── Dockerfile
 ├── requirements.txt
 └── README.md
-\`\`\`
+```
 
-**## Technologies**
+## Technologies
 
-\- Python
+- Python
+- Pandas
+- NumPy
+- Scikit-learn
+- Joblib
+- FastAPI
+- Pydantic
+- Streamlit
+- Pytest
+- Docker
+- Docker Compose
+- Jupyter Notebook
 
-\- Pandas
+## Key Features
 
-\- NumPy
-
-\- Scikit-learn
-
-\- Joblib
-
-\- FastAPI
-
-\- Pydantic
-
-\- Streamlit
-
-\- Pytest
-
-\- Docker
-
-\- Docker Compose
-
-\- Jupyter Notebook
-
-**## Key Features**
-
-\- Exploratory data analysis
-
-\- Data preprocessing
-
-\- Machine-learning model development
-
-\- Gradient Boosting classification
-
-\- Failure probability prediction
-
-\- Configurable classification threshold
-
-\- FastAPI prediction service
-
-\- Input validation using Pydantic
-
-\- Automated API testing
-
-\- Interactive Streamlit dashboard
-
-\- Feature importance analysis
-
-\- Dockerized application
-
-\- Docker Compose orchestration
+- Exploratory data analysis
+- Data preprocessing
+- Machine-learning model development
+- Gradient Boosting classification
+- Failure probability prediction
+- Configurable classification threshold
+- FastAPI prediction service
+- Input validation using Pydantic
+- Automated API testing
+- Interactive Streamlit dashboard
+- Feature importance analysis
+- Dockerized application
+- Docker Compose orchestration
