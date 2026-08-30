@@ -4,3 +4,4 @@ __pycache__/
 .git/
 .github/
 .ipynb_checkpoints/
+.pytest_cache/
