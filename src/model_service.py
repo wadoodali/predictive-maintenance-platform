@@ -6,6 +6,17 @@ import pandas as pd
 
 class ModelService:
 
+    SCALER_FEATURES = [
+        "Air temperature [K]",
+        "Process temperature [K]",
+        "Rotational speed [rpm]",
+        "Torque [Nm]",
+        "Tool wear [min]",
+        "Type_H",
+        "Type_L",
+        "Type_M",
+    ]
+
     MODEL_FEATURES = [
         "Type_H",
         "Type_L",
@@ -27,6 +38,10 @@ class ModelService:
             model_dir / "gradient_boosting_model.pkl"
         )
 
+        self.scaler = joblib.load(
+            model_dir / "scaler.pkl"
+        )
+
     def prepare_input(
         self,
         machine_type: str,
@@ -37,19 +52,32 @@ class ModelService:
         tool_wear: float,
     ) -> pd.DataFrame:
 
-        return pd.DataFrame(
+        machine = pd.DataFrame(
             [{
-                "Type_H": int(machine_type == "H"),
-                "Type_L": int(machine_type == "L"),
-                "Type_M": int(machine_type == "M"),
                 "Air temperature [K]": air_temperature,
                 "Process temperature [K]": process_temperature,
                 "Rotational speed [rpm]": rotational_speed,
                 "Torque [Nm]": torque,
                 "Tool wear [min]": tool_wear,
+                "Type_H": int(machine_type == "H"),
+                "Type_L": int(machine_type == "L"),
+                "Type_M": int(machine_type == "M"),
             }],
-            columns=self.MODEL_FEATURES,
+            columns=self.SCALER_FEATURES,
         )
+
+        # Apply the same scaling used during model development
+        scaled_machine = self.scaler.transform(machine)
+
+        scaled_machine = pd.DataFrame(
+            scaled_machine,
+            columns=self.SCALER_FEATURES,
+        )
+
+        # Apply the same feature order used by the model
+        scaled_machine = scaled_machine[self.MODEL_FEATURES]
+
+        return scaled_machine
 
     def predict(
         self,
